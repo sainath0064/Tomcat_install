@@ -1,0 +1,37 @@
+---
+- name: Setup Tomcat
+  hosts: localhosts
+  become: true
+  tasks:
+    - name: Install Java
+      ansible.builtin.yum:
+        name: java
+        state: installed
+
+    - name: Download Tomcat binary
+      ansible.builtin.get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.19/bin/apache-tomcat-10.1.19.tar.gz
+        dest: /opt
+        mode: '0755'
+
+    - name: Unarchive Tomcat
+      ansible.builtin.unarchive:
+        src: /opt/apache-tomcat-10.1.19.tar.gz
+        dest: /opt
+        remote_src: true
+        mode: '0755'
+
+    - name: Set execute permissions for startup.sh
+      ansible.builtin.file:
+        path: /opt/apache-tomcat-10.1.19/bin/startup.sh
+        mode: "0755"
+
+    - name: Set execute permissions for catalina.sh
+      ansible.builtin.file:
+        path: /opt/apache-tomcat-10.1.19/bin/catalina.sh
+        mode: "0755"
+
+    - name: Start Tomcat
+      ansible.builtin.shell: nohup ./startup.sh &
+      args:
+        chdir: /opt/apache-tomcat-10.1.19/bin
